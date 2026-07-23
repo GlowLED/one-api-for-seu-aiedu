@@ -47,13 +47,11 @@ const EditChannel = () => {
     model_mapping: '',
     system_prompt: '',
     models: [],
-    groups: ['default'],
   };
   const [batch, setBatch] = useState(false);
   const [inputs, setInputs] = useState(originInputs);
   const [originModelOptions, setOriginModelOptions] = useState([]);
   const [modelOptions, setModelOptions] = useState([]);
-  const [groupOptions, setGroupOptions] = useState([]);
   const [basicModels, setBasicModels] = useState([]);
   const [fullModels, setFullModels] = useState([]);
   const [customModel, setCustomModel] = useState('');
@@ -89,11 +87,7 @@ const EditChannel = () => {
       } else {
         data.models = data.models.split(',');
       }
-      if (data.group === '') {
-        data.groups = [];
-      } else {
-        data.groups = data.group.split(',');
-      }
+      data.groups = ['default'];
       if (data.model_mapping !== '') {
         data.model_mapping = JSON.stringify(
           JSON.parse(data.model_mapping),
@@ -127,21 +121,6 @@ const EditChannel = () => {
     }
   };
 
-  const fetchGroups = async () => {
-    try {
-      let res = await API.get(`/api/group/`);
-      setGroupOptions(
-        res.data.data.map((group) => ({
-          key: group,
-          text: group,
-          value: group,
-        }))
-      );
-    } catch (error) {
-      showError(error.message);
-    }
-  };
-
   useEffect(() => {
     let localModelOptions = [...originModelOptions];
     inputs.models.forEach((model) => {
@@ -163,8 +142,7 @@ const EditChannel = () => {
       let localModels = getChannelModels(inputs.type);
       setBasicModels(localModels);
     }
-    fetchModels().then();
-    fetchGroups().then();
+    fetchModels();
   }, []);
 
   const submit = async () => {
@@ -206,7 +184,7 @@ const EditChannel = () => {
     }
     let res;
     localInputs.models = localInputs.models.join(',');
-    localInputs.group = localInputs.groups.join(',');
+    localInputs.group = 'default';
     localInputs.config = JSON.stringify(config);
     if (isEdit) {
       res = await API.put(`/api/channel/`, {
@@ -279,23 +257,8 @@ const EditChannel = () => {
               />
             </Form.Field>
             <Form.Field>
-              <Form.Dropdown
-                label={t('channel.edit.group')}
-                placeholder={t('channel.edit.group_placeholder')}
-                name='groups'
-                required
-                fluid
-                multiple
-                selection
-                allowAdditions
-                additionLabel={t('channel.edit.group_addition')}
-                onChange={handleInputChange}
-                value={inputs.groups}
-                autoComplete='new-password'
-                options={groupOptions}
-              />
+              {renderChannelTip(inputs.type)}
             </Form.Field>
-            {renderChannelTip(inputs.type)}
 
             {/* Azure OpenAI specific fields */}
             {inputs.type === 3 && (

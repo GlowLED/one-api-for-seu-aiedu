@@ -58,6 +58,8 @@ const EditToken = () => {
       if (success && data) {
         if (data.expired_time !== -1) {
           data.expired_time = timestamp2string(data.expired_time);
+        } else {
+          data.expired_time = '';
         }
         if (data.models === '') {
           data.models = [];
@@ -110,7 +112,7 @@ const EditToken = () => {
   const submit = async () => {
     if (!isEdit && inputs.name === '') return;
     let localInputs = inputs;
-    if (localInputs.expired_time !== -1) {
+    if (localInputs.expired_time !== '' && localInputs.expired_time !== -1) {
       let time = Date.parse(localInputs.expired_time);
       if (isNaN(time)) {
         showError(t('token.edit.messages.expire_time_invalid'));

@@ -9,9 +9,6 @@ import Setting from './pages/Setting';
 import EditUser from './pages/User/EditUser';
 import AddUser from './pages/User/AddUser';
 import { API, getLogo, getSystemName, showError, showNotice } from './helpers';
-import PasswordResetForm from './components/PasswordResetForm';
-import GitHubOAuth from './components/GitHubOAuth';
-import PasswordResetConfirm from './components/PasswordResetConfirm';
 import { UserContext } from './context/User';
 import { StatusContext } from './context/Status';
 import Channel from './pages/Channel';
@@ -20,7 +17,6 @@ import EditToken from './pages/Token/EditToken';
 import EditChannel from './pages/Channel/EditChannel';
 import Log from './pages/Log';
 import Chat from './pages/Chat';
-import LarkOAuth from './components/LarkOAuth';
 import Dashboard from './pages/Dashboard';
 
 const Home = lazy(() => import('./pages/Home'));
@@ -193,14 +189,6 @@ function App() {
         }
       />
       <Route
-        path='/user/reset'
-        element={
-          <Suspense fallback={<Loading></Loading>}>
-            <PasswordResetConfirm />
-          </Suspense>
-        }
-      />
-      <Route
         path='/login'
         element={
           <Suspense fallback={<Loading></Loading>}>
@@ -211,30 +199,6 @@ function App() {
       <Route
         path='/register'
         element={<Navigate to='/login' />}
-      />
-      <Route
-        path='/reset'
-        element={
-          <Suspense fallback={<Loading></Loading>}>
-            <PasswordResetForm />
-          </Suspense>
-        }
-      />
-      <Route
-        path='/oauth/github'
-        element={
-          <Suspense fallback={<Loading></Loading>}>
-            <GitHubOAuth />
-          </Suspense>
-        }
-      />
-      <Route
-        path='/oauth/lark'
-        element={
-          <Suspense fallback={<Loading></Loading>}>
-            <LarkOAuth />
-          </Suspense>
-        }
       />
       <Route
         path='/setting'

@@ -77,7 +77,7 @@ export function showError(error) {
   if (!error) return;
   console.error(error);
   if (error.message) {
-    if (error.name === 'AxiosError') {
+    if (error.name === 'AxiosError' && error.response) {
       switch (error.response.status) {
         case 401:
           // toast.error('错误：未登录或登录已过期，请重新登录！', showErrorOptions);

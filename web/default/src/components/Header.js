@@ -267,7 +267,7 @@ const Header = () => {
             />
             {userState.user ? (
               <Dropdown
-                text={userState.user.username}
+                text={userState.user.display_name || userState.user.username}
                 pointing
                 className='link item'
                 style={{
