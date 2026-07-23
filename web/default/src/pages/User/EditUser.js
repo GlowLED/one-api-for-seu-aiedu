@@ -1,13 +1,15 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button, Form, Card } from 'semantic-ui-react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { API, showError, showSuccess } from '../../helpers';
+import { UserContext } from '../../context/User';
 
 const EditUser = () => {
   const { t } = useTranslation();
   const params = useParams();
   const userId = params.id;
+  const [userState, userDispatch] = useContext(UserContext);
   const [loading, setLoading] = useState(true);
   const [inputs, setInputs] = useState({
     username: '',
@@ -15,6 +17,8 @@ const EditUser = () => {
     password: '',
     points: 0,
     daily_points: 0,
+    email: '',
+    student_id: '',
   });
   const {
     username,
@@ -22,9 +26,15 @@ const EditUser = () => {
     password,
     points,
     daily_points,
+    email,
+    student_id,
   } = inputs;
   const handleInputChange = (e, { name, value }) => {
     if (name === 'points' || name === 'daily_points') {
+      if (value !== '' && !/^\d+$/.test(value)) {
+        showError(name === 'points' ? '积分必须是非负整数' : '每日积分必须是非负整数');
+        return;
+      }
       value = parseInt(value);
       if (isNaN(value) || value < 0) {
         showError(name === 'points' ? '积分必须是非负整数' : '每日积分必须是非负整数');
@@ -35,7 +45,11 @@ const EditUser = () => {
   };
   const navigate = useNavigate();
   const handleCancel = () => {
-    navigate('/setting');
+    if (userId) {
+      navigate('/user');
+    } else {
+      navigate('/setting');
+    }
   };
   const loadUser = async () => {
     let res = undefined;
@@ -69,7 +83,10 @@ const EditUser = () => {
       }
       res = await API.put(`/api/user/`, data);
     } else {
-      res = await API.put(`/api/user/self`, inputs);
+      res = await API.put(`/api/user/self`, {
+        password: inputs.password,
+        display_name: inputs.display_name,
+      });
     }
     const { success, message } = res.data;
     if (success) {
@@ -77,6 +94,10 @@ const EditUser = () => {
       if (userId) {
         navigate('/user');
       } else {
+        let user = JSON.parse(localStorage.getItem('user'));
+        user.display_name = inputs.display_name;
+        localStorage.setItem('user', JSON.stringify(user));
+        userDispatch({ type: 'login', payload: user });
         navigate('/setting');
       }
     } else {
@@ -90,13 +111,25 @@ const EditUser = () => {
         <Card.Content>
           <Card.Header className='header'>{t('user.edit.title')}</Card.Header>
           <Form loading={loading} autoComplete='new-password'>
+            {userId && (
+              <Form.Field>
+                <Form.Input
+                  label={t('user.edit.username')}
+                  name='username'
+                  placeholder={t('user.edit.username_placeholder')}
+                  onChange={handleInputChange}
+                  value={username}
+                  autoComplete='new-password'
+                />
+              </Form.Field>
+            )}
             <Form.Field>
               <Form.Input
-                label={t('user.edit.username')}
-                name='username'
-                placeholder={t('user.edit.username_placeholder')}
+                label={t('user.edit.display_name')}
+                name='display_name'
+                placeholder={t('user.edit.display_name_placeholder')}
                 onChange={handleInputChange}
-                value={username}
+                value={display_name}
                 autoComplete='new-password'
               />
             </Form.Field>
@@ -108,16 +141,6 @@ const EditUser = () => {
                 placeholder={t('user.edit.password_placeholder')}
                 onChange={handleInputChange}
                 value={password}
-                autoComplete='new-password'
-              />
-            </Form.Field>
-            <Form.Field>
-              <Form.Input
-                label={t('user.edit.display_name')}
-                name='display_name'
-                placeholder={t('user.edit.display_name_placeholder')}
-                onChange={handleInputChange}
-                value={display_name}
                 autoComplete='new-password'
               />
             </Form.Field>
@@ -142,6 +165,26 @@ const EditUser = () => {
                     onChange={handleInputChange}
                     value={daily_points}
                     type={'number'}
+                    autoComplete='new-password'
+                  />
+                </Form.Field>
+                <Form.Field>
+                  <Form.Input
+                    label='邮箱'
+                    name='email'
+                    placeholder='请输入邮箱地址'
+                    onChange={handleInputChange}
+                    value={email}
+                    autoComplete='new-password'
+                  />
+                </Form.Field>
+                <Form.Field>
+                  <Form.Input
+                    label='一卡通号'
+                    name='student_id'
+                    placeholder='请输入一卡通号'
+                    onChange={handleInputChange}
+                    value={student_id}
                     autoComplete='new-password'
                   />
                 </Form.Field>

@@ -38,6 +38,9 @@ const UsersTable = () => {
   const [searchKeyword, setSearchKeyword] = useState('');
   const [searching, setSearching] = useState(false);
   const [orderBy, setOrderBy] = useState('');
+  const selfUser = JSON.parse(localStorage.getItem('user') || '{}');
+  const myRole = selfUser ? selfUser.role : 0;
+  const myId = selfUser ? selfUser.id : 0;
 
   const loadUsers = async (startIdx) => {
     const res = await API.get(`/api/user/?p=${startIdx}&order=${orderBy}`);
@@ -169,6 +172,8 @@ const UsersTable = () => {
     setActivePage(1);
   };
 
+  if (myRole < 10) return null;
+
   return (
     <>
       <Form onSubmit={searchUsers}>
@@ -279,79 +284,83 @@ const UsersTable = () => {
                   <Table.Cell>{renderStatus(user.status)}</Table.Cell>
                   <Table.Cell>
                     <div>
-                      <Button
-                        size={'tiny'}
-                        positive
-                        onClick={() => {
-                          manageUser(user.username, 'promote', idx);
-                        }}
-                        disabled={user.role === 100}
-                      >
-                        {t('user.buttons.promote')}
-                      </Button>
-                      <Button
-                        size={'tiny'}
-                        color={'yellow'}
-                        onClick={() => {
-                          manageUser(user.username, 'demote', idx);
-                        }}
-                        disabled={user.role === 100}
-                      >
-                        {t('user.buttons.demote')}
-                      </Button>
-                      <Popup
-                        trigger={
-                          <Button
-                            size='tiny'
-                            negative
-                            disabled={user.role === 100}
-                          >
-                            {t('user.buttons.delete')}
-                          </Button>
-                        }
-                        on='click'
-                        flowing
-                        hoverable
-                      >
+                      {myRole === 100 && user.role < 100 && (
                         <Button
-                          negative
                           size={'tiny'}
+                          positive
                           onClick={() => {
-                            manageUser(user.username, 'delete', idx);
+                            manageUser(user.username, 'promote', idx);
                           }}
                         >
-                          {t('user.buttons.delete_user')} {user.username}
+                          {t('user.buttons.promote')}
                         </Button>
-                      </Popup>
-                      <Button
-                        size={'tiny'}
-                        onClick={() => {
-                          manageUser(
-                            user.username,
-                            user.status === 1 ? 'disable' : 'enable',
-                            idx
-                          );
-                        }}
-                        disabled={user.role === 100}
-                      >
-                        {user.status === 1
-                          ? t('user.buttons.disable')
-                          : t('user.buttons.enable')}
-                      </Button>
-					  <Button
-						size={'tiny'}
-						onClick={() => manageUser(user.username, 'reset_points', idx)}
-						disabled={user.role === 100}
-					  >
-						{t('user.buttons.reset_points')}
-					  </Button>
-					  <Button
-						size={'tiny'}
-						as={Link}
-                        to={'/user/edit/' + user.id}
-                      >
-                        {t('user.buttons.edit')}
-                      </Button>
+                      )}
+                      {myRole === 100 && user.role < 100 && (
+                        <Button
+                          size={'tiny'}
+                          color={'yellow'}
+                          onClick={() => {
+                            manageUser(user.username, 'demote', idx);
+                          }}
+                        >
+                          {t('user.buttons.demote')}
+                        </Button>
+                      )}
+                      {myRole > user.role && (
+                        <Popup
+                          trigger={
+                            <Button size='tiny' negative>
+                              {t('user.buttons.delete')}
+                            </Button>
+                          }
+                          on='click'
+                          flowing
+                          hoverable
+                        >
+                          <Button
+                            negative
+                            size={'tiny'}
+                            onClick={() => {
+                              manageUser(user.username, 'delete', idx);
+                            }}
+                          >
+                            {t('user.buttons.delete_user')} {user.username}
+                          </Button>
+                        </Popup>
+                      )}
+                      {myRole > user.role && (
+                        <Button
+                          size={'tiny'}
+                          onClick={() => {
+                            manageUser(
+                              user.username,
+                              user.status === 1 ? 'disable' : 'enable',
+                              idx
+                            );
+                          }}
+                        >
+                          {user.status === 1
+                            ? t('user.buttons.disable')
+                            : t('user.buttons.enable')}
+                        </Button>
+                      )}
+                      {(myRole > user.role || (myRole === 100 && myId === user.id)) && (
+                        <Button
+                          size={'tiny'}
+                          onClick={() => manageUser(user.username, 'reset_points', idx)}
+                        >
+                          {t('user.buttons.reset_points')}
+                        </Button>
+                      )}
+                      {(myRole > user.role || (myRole === 100 && myId === user.id)) && (
+                        <Button
+                          size={'tiny'}
+                          as={Link}
+                          to={'/user/edit/' + user.id}
+                        >
+                          {t('user.buttons.edit')}
+                        </Button>
+                      )}
                     </div>
                   </Table.Cell>
                 </Table.Row>

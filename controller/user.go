@@ -174,7 +174,7 @@ func GetUser(c *gin.Context) {
 	if myRole <= user.Role && myRole != model.RoleRootUser {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": "无权获取同级或更高等级用户的信息",
+			"message": i18n.Translate(c, "invalid_input") + " " + err.Error(),
 		})
 		return
 	}
@@ -362,7 +362,6 @@ func UpdateSelf(c *gin.Context) {
 
 	cleanUser := model.User{
 		Id:          c.GetInt(ctxkey.Id),
-		Username:    user.Username,
 		Password:    user.Password,
 		DisplayName: user.DisplayName,
 	}
@@ -435,7 +434,7 @@ func CreateUser(c *gin.Context) {
 	if err := common.Validate.Struct(&user); err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": i18n.Translate(c, "invalid_input"),
+			"message": i18n.Translate(c, "invalid_input") + " " + err.Error(),
 		})
 		return
 	}
@@ -456,6 +455,8 @@ func CreateUser(c *gin.Context) {
 		Password:    user.Password,
 		DisplayName: user.DisplayName,
 		DailyPoints: user.DailyPoints,
+		Email:       user.Email,
+		StudentId:   user.StudentId,
 	}
 	if err := cleanUser.Insert(ctx, 0); err != nil {
 		c.JSON(http.StatusOK, gin.H{

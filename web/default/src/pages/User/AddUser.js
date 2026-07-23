@@ -12,12 +12,18 @@ const AddUser = () => {
     display_name: '',
     password: '',
     daily_points: 500,
+    email: '',
+    student_id: '',
   };
   const [inputs, setInputs] = useState(originInputs);
-  const { username, display_name, password } = inputs;
+  const { username, display_name, password, email, student_id } = inputs;
 
   const handleInputChange = (e, { name, value }) => {
     if (name === 'daily_points') {
+      if (value !== '' && !/^\d+$/.test(value)) {
+        showError('每日积分必须是非负整数');
+        return;
+      }
       value = parseInt(value);
       if (isNaN(value) || value < 0) {
         showError('每日积分必须是非负整数');
@@ -29,6 +35,10 @@ const AddUser = () => {
 
   const submit = async () => {
     if (inputs.username === '' || inputs.password === '') return;
+    if (inputs.password.length < 8) {
+      showError('密码长度不能少于8位');
+      return;
+    }
     const res = await API.post(`/api/user/`, inputs);
     const { success, message } = res.data;
     if (success) {
@@ -86,6 +96,24 @@ const AddUser = () => {
                 value={inputs.daily_points}
                 onChange={handleInputChange}
                 placeholder='每日刷新时重置为此数值'
+              />
+            </Form.Field>
+            <Form.Field>
+              <Form.Input
+                label='邮箱'
+                name='email'
+                value={email}
+                onChange={handleInputChange}
+                placeholder='请输入邮箱地址'
+              />
+            </Form.Field>
+            <Form.Field>
+              <Form.Input
+                label='一卡通号'
+                name='student_id'
+                value={student_id}
+                onChange={handleInputChange}
+                placeholder='请输入一卡通号'
               />
             </Form.Field>
             <Button positive type='submit' onClick={submit}>
