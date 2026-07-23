@@ -36,6 +36,7 @@ func InitOptionMap() {
 	config.OptionMap["AutomaticEnableChannelEnabled"] = strconv.FormatBool(config.AutomaticEnableChannelEnabled)
 	config.OptionMap["ApproximateTokenEnabled"] = strconv.FormatBool(config.ApproximateTokenEnabled)
 	config.OptionMap["LogConsumeEnabled"] = strconv.FormatBool(config.LogConsumeEnabled)
+	config.OptionMap["ChargeByRequest"] = strconv.FormatBool(config.ChargeByRequest)
 	config.OptionMap["DisplayTokenStatEnabled"] = strconv.FormatBool(config.DisplayTokenStatEnabled)
 	config.OptionMap["ChannelDisableThreshold"] = strconv.FormatFloat(config.ChannelDisableThreshold, 'f', -1, 64)
 	config.OptionMap["EmailDomainRestrictionEnabled"] = strconv.FormatBool(config.EmailDomainRestrictionEnabled)
@@ -64,6 +65,7 @@ func InitOptionMap() {
 	config.OptionMap["PointsRefreshTime"] = config.PointsRefreshTime
 	config.OptionMap["PointsRefreshTimezone"] = config.PointsRefreshTimezone
 	config.OptionMap["LastPointsRefreshDate"] = config.LastPointsRefreshDate
+	config.OptionMap["PerRequestPoints"] = strconv.FormatInt(config.PerRequestPoints, 10)
 	config.OptionMap["PreConsumedPoints"] = strconv.FormatInt(config.PreConsumedPoints, 10)
 	config.OptionMap["ModelRatio"] = billingratio.ModelRatio2JSONString()
 	config.OptionMap["CompletionRatio"] = billingratio.CompletionRatio2JSONString()
@@ -152,6 +154,8 @@ func updateOptionMap(key string, value string) (err error) {
 		}
 	}
 	switch key {
+	case "ChargeByRequest":
+		config.ChargeByRequest = value == "true"
 	case "EmailDomainWhitelist":
 		config.EmailDomainWhitelist = strings.Split(value, ",")
 	case "SMTPServer":
@@ -213,6 +217,8 @@ func updateOptionMap(key string, value string) (err error) {
 		config.PointsRefreshTimezone = value
 	case "LastPointsRefreshDate":
 		config.LastPointsRefreshDate = value
+	case "PerRequestPoints":
+		config.PerRequestPoints, _ = strconv.ParseInt(value, 10, 64)
 	case "PreConsumedPoints":
 		config.PreConsumedPoints, _ = strconv.ParseInt(value, 10, 64)
 	case "RetryTimes":
