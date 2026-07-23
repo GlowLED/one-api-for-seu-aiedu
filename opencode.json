@@ -1,0 +1,22 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "provider": {
+    "one_api": {
+      "name": "One API",
+      "npm": "@ai-sdk/openai-compatible",
+      "options": {
+        "baseURL": "http://localhost:3000/v1",
+        "apiKey": "sk-DvmkpmWzsUJWTyti563583B5044f4cF3B234Fe026b5a6aA0"
+      },
+      "models": {
+        "deepseek-chat": {
+          "name": "deepseek-chat"
+        },
+        "deepseek-reasoner": {
+          "name": "deepseek-reasoner"
+        }
+      }
+    }
+  },
+  "model": "one_api/deepseek-chat"
+}

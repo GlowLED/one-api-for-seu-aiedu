@@ -11,7 +11,7 @@ const AddUser = () => {
     username: '',
     display_name: '',
     password: '',
-    daily_points: 500,
+    daily_points: 100000,
     email: '',
     student_id: '',
   };

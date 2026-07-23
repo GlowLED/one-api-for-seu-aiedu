@@ -23,7 +23,7 @@ const EditToken = () => {
   const [modelOptions, setModelOptions] = useState([]);
   const originInputs = {
     name: '',
-    expired_time: -1,
+    expired_time: '',
     models: [],
     subnet: '',
   };
@@ -61,7 +61,7 @@ const EditToken = () => {
         } else {
           data.expired_time = '';
         }
-        if (data.models === '') {
+        if (!data.models || data.models === '') {
           data.models = [];
         } else {
           data.models = data.models.split(',');
@@ -111,7 +111,7 @@ const EditToken = () => {
 
   const submit = async () => {
     if (!isEdit && inputs.name === '') return;
-    let localInputs = inputs;
+    let localInputs = { ...inputs, models: [...inputs.models] };
     if (localInputs.expired_time !== '' && localInputs.expired_time !== -1) {
       let time = Date.parse(localInputs.expired_time);
       if (isNaN(time)) {

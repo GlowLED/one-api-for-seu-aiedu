@@ -67,6 +67,9 @@ func getPreConsumedPoints(textRequest *relaymodel.GeneralOpenAIRequest, promptTo
 
 func preConsumePoints(ctx context.Context, textRequest *relaymodel.GeneralOpenAIRequest, promptTokens int, ratio float64, meta *meta.Meta) (int64, *relaymodel.ErrorWithStatusCode) {
 	preConsumedPoints := getPreConsumedPoints(textRequest, promptTokens, ratio)
+	if config.ChargeByRequest {
+		preConsumedPoints = config.PerRequestPoints
+	}
 
 	if preConsumedPoints > 0 {
 		err := model.PreConsumeTokenPoints(meta.TokenId, preConsumedPoints)
@@ -88,18 +91,23 @@ func postConsumePoints(ctx context.Context, usage *relaymodel.Usage, meta *meta.
 		return
 	}
 	var points int64
-	completionRatio := billingratio.GetCompletionRatio(textRequest.Model, meta.ChannelType)
-	promptTokens := usage.PromptTokens
-	completionTokens := usage.CompletionTokens
-	points = int64(math.Ceil((float64(promptTokens) + float64(completionTokens)*completionRatio) * ratio))
-	if ratio != 0 && points <= 0 {
-		points = 1
-	}
-	totalTokens := promptTokens + completionTokens
-	if totalTokens == 0 {
-		// in this case, must be some error happened
-		// we cannot just return, because we may have to return the pre-consumed quota
-		points = 0
+	var completionRatio float64
+	var promptTokens int
+	var completionTokens int
+	if config.ChargeByRequest {
+		points = config.PerRequestPoints
+	} else {
+		completionRatio = billingratio.GetCompletionRatio(textRequest.Model, meta.ChannelType)
+		promptTokens = usage.PromptTokens
+		completionTokens = usage.CompletionTokens
+		points = int64(math.Ceil((float64(promptTokens) + float64(completionTokens)*completionRatio) * ratio))
+		if ratio != 0 && points <= 0 {
+			points = 1
+		}
+		totalTokens := promptTokens + completionTokens
+		if totalTokens == 0 {
+			points = 0
+		}
 	}
 	pointsDelta := points - preConsumedPoints
 	err := model.PostConsumeTokenPoints(meta.TokenId, pointsDelta)
@@ -111,6 +119,9 @@ func postConsumePoints(ctx context.Context, usage *relaymodel.Usage, meta *meta.
 		logger.Error(ctx, "error update user points cache: "+err.Error())
 	}
 	logContent := fmt.Sprintf("倍率：%.2f × %.2f × %.2f", modelRatio, groupRatio, completionRatio)
+	if config.ChargeByRequest {
+		logContent = "按次计费"
+	}
 	model.RecordConsumeLog(ctx, &model.Log{
 		UserId:            meta.UserId,
 		ChannelId:         meta.ChannelId,

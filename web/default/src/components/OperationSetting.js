@@ -81,7 +81,7 @@ const OperationSetting = () => {
   };
 
   const handleInputChange = async (e, { name, value }) => {
-    if (name.endsWith('Enabled')) {
+    if (name.endsWith('Enabled') || name === 'ChargeByRequest') {
       await updateOption(name, value);
     } else {
       setInputs((inputs) => ({ ...inputs, [name]: value }));
@@ -193,6 +193,36 @@ const OperationSetting = () => {
             保存
           </Form.Button>
           <Divider />
+          <Header as='h3'>扣费设置</Header>
+          <Form.Group inline>
+            <Form.Checkbox
+              checked={inputs.ChargeByRequest === 'true'}
+              label='按次计费（每次请求固定扣积分）'
+              name='ChargeByRequest'
+              onChange={async () => {
+                const newVal = inputs.ChargeByRequest === 'true' ? 'false' : 'true';
+                await updateOption('ChargeByRequest', newVal);
+              }}
+            />
+          </Form.Group>
+          {inputs.ChargeByRequest === 'true' && (
+            <Form.Group widths={4}>
+              <Form.Input
+                label='每次请求扣除积分'
+                name='PerRequestPoints'
+                type='number'
+                min='1'
+                value={inputs.PerRequestPoints}
+                onChange={async (e, { name, value }) => {
+                  setInputs((inputs) => ({ ...inputs, [name]: value }));
+                  await updateOption(name, value);
+                }}
+              />
+            </Form.Group>
+          )}
+          {inputs.ChargeByRequest !== 'true' && (
+          <>
+          <Divider />
           <Header as='h3'>{t('setting.operation.ratio.title')}</Header>
           <Form.Group widths='equal'>
             <Form.TextArea
@@ -223,6 +253,8 @@ const OperationSetting = () => {
           >
             {t('setting.operation.ratio.buttons.save')}
           </Form.Button>
+          </>
+          )}
           <Divider />
           <Header as='h3'>{t('setting.operation.log.title')}</Header>
           <Form.Group inline>

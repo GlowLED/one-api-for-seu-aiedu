@@ -142,6 +142,7 @@ const Dashboard = () => {
 
     // 填充实际数据
     data.forEach((item) => {
+      if (!dailyData[item.Day]) return;
       dailyData[item.Day].requests += item.RequestCount;
 	  dailyData[item.Day].quota += item.Points;
       dailyData[item.Day].tokens += item.PromptTokens + item.CompletionTokens;
@@ -187,6 +188,7 @@ const Dashboard = () => {
 
     // 填充实际数据
     data.forEach((item) => {
+      if (!timeData[item.Day]) return;
       timeData[item.Day][item.ModelName] =
         item.PromptTokens + item.CompletionTokens;
     });
